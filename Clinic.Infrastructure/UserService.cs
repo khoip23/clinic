@@ -1,0 +1,42 @@
+﻿using Clinic.Application;
+using Clinic.Domain.Entities;
+using Clinic.Domain;
+using Clinic.Infrastructure.Helpers;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Clinic.Infrastructure
+{
+    public class UserService : IUserService
+    {
+        private readonly ClinicDbContext _context;
+
+        public UserService(ClinicDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<int> RegisterUserAsync(DTOs dto)
+        {
+            if (await _context.Users.AnyAsync(u => u.UserName == dto.UserName))
+                throw new Exception("Tên tài khoản này đã tồn tại");
+
+            var user = new User
+            {
+                UserName = dto.UserName,
+                FullName = dto.FullName,
+                Password = PasswordHelper.HashPassword(dto.Password),
+                Role = (int)RoleType.Patient
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return user.Id;
+        }
+    }
+}

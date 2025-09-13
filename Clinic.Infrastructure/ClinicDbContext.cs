@@ -20,6 +20,6 @@ namespace Clinic.Infrastructure
         }
 
         public DbSet<TestTable> TestTables { get; set; }
-        public DbSet<User> User { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Clinic.Application;
 using Clinic.Domain;
+using Clinic.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -26,12 +27,12 @@ namespace Clinic.Infrastructure
 
         public async Task<ResponseDto> LoginAsync(LoginDto dto)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
             if (user == null)
                 throw new Exception("User not found");
 
-            // Kiểm tra password (ở đây giả sử Password đã hash sẵn)
-            if (user.Password != dto.Password) // 👉 ở thực tế thì phải hash để so sánh
+            // Kiểm tra password
+            if (!PasswordHelper.VerifyPassword(dto.Password, user.Password))
                 throw new Exception("Invalid password");
 
             var role = (RoleType)user.Role;
@@ -43,7 +44,7 @@ namespace Clinic.Infrastructure
                 new Claim(ClaimTypes.Role, role.ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Serect-Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
