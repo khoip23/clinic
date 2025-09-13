@@ -47,7 +47,7 @@ builder.Services.AddApplication();
 
 
 //Thêm middleware authentication
-var privateKey = builder.Configuration["jwt:Serect-Key"];
+var privateKey = builder.Configuration["jwt:Key"];
 var Issuer = builder.Configuration["jwt:Issuer"];
 var Audience = builder.Configuration["jwt:Audience"];
 // Thêm dịch vụ Authentication vào ứng dụng, sử dụng JWT Bearer làm phương thức xác thực
