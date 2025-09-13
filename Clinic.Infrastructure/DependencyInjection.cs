@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Clinic.Application;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -12,7 +13,7 @@ namespace Clinic.Infrastructure
     public static class DependencyInjection
     {
         // static method
-        // them this => extension method
+        // thêm this => extension method
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ClinicDbContext>((opts) =>
@@ -27,6 +28,9 @@ namespace Clinic.Infrastructure
             {
                 db.Database.Migrate();
             }
+
+            // Đăng ký AuthService
+            services.AddScoped<IAuthService, AuthService>();
         }
     }
 }
