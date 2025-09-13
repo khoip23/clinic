@@ -4,10 +4,11 @@ using Clinic.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using Clinic.Domain;
 
 namespace Clinic.Api.Controllers
 {
-    [Route("api/game")]
+    [Route("api/register")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -33,7 +34,7 @@ namespace Clinic.Api.Controllers
                 Password = hashedPassword,
                 FullName = dto.FullName,
                 DOB = dto.DOB,
-                Role = 1 //1: bệnh nhân, 2: lễ tân, 3: bác sĩ, 4: admin
+                Role = (int)RoleType.Patient
             };
 
             _context.User.Add(user);

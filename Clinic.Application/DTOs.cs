@@ -13,4 +13,17 @@ namespace Clinic.Application
         public string FullName { get; set; } = "";
         public DateTime DOB { get; set; }
     }
+
+    public class LoginDto
+    {
+        public string UserName { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    public class ResponseDto
+    {
+        public string Token { get; set; }
+        public string FullName { get; set; }
+        public string Role { get; set; }
+    }
 }
