@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 using Clinic.Domain;
 using Clinic.Infrastructure.Helpers;
+using Clinic.Application.DTOs;
 
 namespace Clinic.Api.Controllers
 {

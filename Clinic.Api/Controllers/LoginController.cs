@@ -1,4 +1,5 @@
 ﻿using Clinic.Application;
+using Clinic.Application.DTOs;
 using Clinic.Domain;
 using Clinic.Infrastructure;
 using Clinic.Infrastructure.Helpers;
