@@ -8,8 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Clinic.Application.DTOs;
 
-namespace Clinic.Infrastructure
+namespace Clinic.Infrastructure.Services
 {
     public class UserService : IUserService
     {

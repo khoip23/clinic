@@ -1,4 +1,5 @@
 ﻿using Clinic.Application.DTOs;
+using Clinic.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Clinic.Application
 {
-    public interface IAuthService
+    public interface IAppointmentService
     {
-        Task<ResponseDto> LoginAsync(LoginDto dto);
+        Task<Appointment> CreateAppointmentAsync(int userId, CreateAppointmentRequest request);
     }
 }

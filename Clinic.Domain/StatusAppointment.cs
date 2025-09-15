@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Application
+namespace Clinic.Domain
 {
-    public interface IUserService
+    public enum StatusAppointment
     {
-        Task<int> RegisterUserAsync(DTOs.DTOs dto);
+        Active = 1,
+        Visitted = 2,
+        Canceled = 3,
     }
 }

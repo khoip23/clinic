@@ -1,4 +1,5 @@
 ﻿using Clinic.Application;
+using Clinic.Application.DTOs;
 using Clinic.Domain;
 using Clinic.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Infrastructure
+namespace Clinic.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
