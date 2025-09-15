@@ -35,8 +35,8 @@ namespace Clinic.Infrastructure.Services
             {
                 UserId = UserId,
                 DoctorId = request.DoctorId,
-                Date = request.Date.Date,
-                Time = request.Time,
+                Date = DateOnly.FromDateTime(request.Date),
+                Time = TimeOnly.FromTimeSpan(request.Time),
                 CreatedAt = DateTime.UtcNow,
                 Status = (int)StatusAppointment.Active,
                 VisittedAt = null,

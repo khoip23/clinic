@@ -15,7 +15,7 @@ namespace Clinic.Domain.Entities
         public User User { get; set; }
         public DateOnly Date { get; set; }
         public TimeOnly Time { get; set; }
-        [ForeignKey("User")]
+        [ForeignKey("Doctor")]
         public int? DoctorId { get; set; }
         public User Doctor { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
