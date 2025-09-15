@@ -22,8 +22,5 @@ namespace Clinic.Domain.Entities
         public int Status { get; set; }
         public DateTime? VisittedAt { get; set; }
         public DateTime? CanceledAt { get; set; }
-
-        
-        
     }
 }
