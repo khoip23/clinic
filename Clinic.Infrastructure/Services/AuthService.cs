@@ -41,6 +41,7 @@ namespace Clinic.Infrastructure.Services
             // Sinh JWT
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Role, role.ToString())
             };
