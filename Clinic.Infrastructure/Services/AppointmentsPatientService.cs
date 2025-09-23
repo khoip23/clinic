@@ -18,18 +18,14 @@ namespace Clinic.Infrastructure.Services
             _context = context;
         }
 
-        public async Task<List<AppointmentPatientDto>> GetAppointmentsForPatientAsync(int patientId, string status = "Active")
+        public async Task<List<AppointmentPatientDto>> GetAppointmentsForPatientAsync(int patientId, StatusAppointment? status = StatusAppointment.Active)
         {
             var query = _context.Appointments
-                .Include(a => a.Doctor)
-                .Where(a => a.UserId == patientId);
+        .Where(a => a.UserId == patientId);
 
-            if(!string.IsNullOrWhiteSpace(status))
+            if (status.HasValue)
             {
-                if(Enum.TryParse<StatusAppointment>(status, true, out var parsedStatus))
-                {
-                    query = query.Where(a => a.Status == (int)parsedStatus);
-                }    
+                query = query.Where(a => a.Status == (int)status.Value);
             }
 
             return await query

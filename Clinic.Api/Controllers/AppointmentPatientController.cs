@@ -1,5 +1,6 @@
 ﻿using Clinic.Application;
 using Clinic.Application.DTOs;
+using Clinic.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,7 +20,7 @@ namespace Clinic.Api.Controllers
         }
 
         [HttpGet("Get-Appointment-Patient")]
-        public async Task<IActionResult> GetAppointmentPatient([FromQuery] string status = "Active")
+        public async Task<IActionResult> GetAppointmentPatient([FromQuery] StatusAppointment? status = StatusAppointment.Active)
         {
             var patientIdGet = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(patientIdGet) || !int.TryParse(patientIdGet, out var patientId))
