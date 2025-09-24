@@ -36,6 +36,7 @@ namespace Clinic.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IAppointmentPatientService, AppointmentsPatientService>();
+            services.AddScoped<IAppointmentReceptionistService, AppointmentReceptionistService>();
 
 
         }
