@@ -22,5 +22,7 @@ namespace Clinic.Infrastructure
         public DbSet<TestTable> TestTables { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<PatientRecord> PatientRecords { get; set; }
     }
 }
