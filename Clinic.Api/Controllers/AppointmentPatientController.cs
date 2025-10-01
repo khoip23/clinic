@@ -10,7 +10,7 @@ namespace Clinic.Api.Controllers
     [ApiController]
     [Route("api/getappointment-patient")]
     [Authorize(Roles = "Patient")]
-    public class AppointmentPatientController : ControllerBase
+    public class AppointmentPatientController : ClinicBaseController
     {
         private readonly IAppointmentPatientService _appointmentPatientService;
 
@@ -22,12 +22,13 @@ namespace Clinic.Api.Controllers
         [HttpGet("Get-Appointment-Patient")]
         public async Task<IActionResult> GetAppointmentPatient([FromQuery] StatusAppointment? status = StatusAppointment.Active)
         {
-            var patientIdGet = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(patientIdGet) || !int.TryParse(patientIdGet, out var patientId))
-            { return Unauthorized(new { message = "Không tìm  thấy thông tin người dùng" }); }    
-            
-
-            var appointmentPatient = await _appointmentPatientService.GetAppointmentsForPatientAsync(patientId, status);
+            var patientId = GetCurrentUserId();
+            // validation
+            if (patientId == null)
+            { 
+                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" }); 
+            }    
+            var appointmentPatient = await _appointmentPatientService.GetAppointmentsForPatientAsync(patientId.Value, status);
             return Ok(appointmentPatient);
         }
     }
