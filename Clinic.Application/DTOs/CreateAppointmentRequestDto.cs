@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Clinic.Application.DTOs
 {
-    public class CreateAppointmentRequest
+    public class CreateAppointmentRequestDto
     {
         public DateTime Date { get; set; }
         public TimeSpan Time { get; set; }

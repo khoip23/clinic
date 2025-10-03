@@ -16,7 +16,7 @@ namespace Clinic.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest request)
+        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequestDto request)
         {
             try
             {

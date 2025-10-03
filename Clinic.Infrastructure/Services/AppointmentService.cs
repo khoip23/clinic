@@ -19,7 +19,7 @@ namespace Clinic.Infrastructure.Services
             _context = context;
         }
 
-        public async Task<Appointment> CreateAppointmentAsync(int UserId, CreateAppointmentRequest request)
+        public async Task<Appointment> CreateAppointmentAsync(int UserId, CreateAppointmentRequestDto request)
         {
             if(request.DoctorId == null)
             {

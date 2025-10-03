@@ -10,6 +10,6 @@ namespace Clinic.Application
 {
     public interface IAppointmentService
     {
-        Task<Appointment> CreateAppointmentAsync(int userId, CreateAppointmentRequest request);
+        Task<Appointment> CreateAppointmentAsync(int userId, CreateAppointmentRequestDto request);
     }
 }
