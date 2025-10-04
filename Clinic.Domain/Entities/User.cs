@@ -25,5 +25,6 @@ namespace Clinic.Domain.Entities
         public int Role { get; set; }
         [Column(TypeName = "date")]
         public DateTime DOB { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

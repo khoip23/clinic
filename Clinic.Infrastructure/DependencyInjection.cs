@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Clinic.Infrastructure
 {
@@ -23,13 +24,6 @@ namespace Clinic.Infrastructure
                 opts.UseSqlServer(connectionString);
             });
 
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ClinicDbContext>();
-            if (db.Database.GetPendingMigrations().Any())
-            {
-                db.Database.Migrate();
-            }
-
             // Đăng ký AuthService
             services.AddScoped<IAuthService, AuthService>();
 
@@ -37,8 +31,18 @@ namespace Clinic.Infrastructure
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IAppointmentPatientService, AppointmentsPatientService>();
             services.AddScoped<IAppointmentReceptionistService, AppointmentReceptionistService>();
-
+            services.AddScoped<IPatientRecordService, PatientRecordService>();
 
         }
+
+        public static void MigrateDatabase(this IServiceProvider serviceProvider)
+        {
+            var db = serviceProvider.GetRequiredService<ClinicDbContext>();
+            if (db.Database.GetPendingMigrations().Any())
+            {
+                db.Database.Migrate();
+            }
+        }
+
     }
 }

@@ -8,5 +8,14 @@ namespace Clinic.Application.DTOs
 {
     public class PatientRecordDto
     {
+        public int Id { get; set; }
+        public int PatientId { get; set; }
+        public int ReceivedBy { get; set; }
+        public string FullName { get; set; }
+        public DateTime DOB { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int? AppointmentId { get; set; }
     }
 }
