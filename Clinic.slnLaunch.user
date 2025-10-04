@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Backend + Blazor",
+    "Projects": [
+      {
+        "Path": "Clinic.Api\\Clinic.Api.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Clinic.Blazor\\Clinic.Blazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
