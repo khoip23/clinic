@@ -1,0 +1,59 @@
+﻿@page "/"
+@using System.Text.Json.Nodes
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+<button @onclick="Login">Login</button>
+<button @onclick="TestAuthRequest">Test authorized request</button>
+<p>Token: @Token</p>
+<p>Appointment: @Appointment</p>
+
+@code {
+    private string Token;
+    private string Appointment;
+
+    private async Task Login()
+    {
+        try
+        {
+            var res = await Http.PostAsync("/login", JsonContent.Create(new
+            {
+                userName = "cuong",
+                password = "123123"
+            }));
+            var jo = JsonObject.Parse(await res.Content.ReadAsStringAsync());
+            var token = jo["token"]?.ToString();
+            await JSRuntime.InvokeVoidAsync("setToken", "access_token", token);
+            Token = token;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task TestAuthRequest()
+    {
+        try
+        {
+            var token = await JSRuntime.InvokeAsync<string>("getToken", "access_token");
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var res = Http.PostAsync("/api/appointment", JsonContent.Create(new
+            {
+                date = DateTime.Now,
+                time = new TimeSpan(10, 0, 0),
+                doctorId = null as int?
+            }));
+            Appointment = await res.Result.Content.ReadAsStringAsync();
+        }
+        catch(Exception ex)
+        {
+            
+        }
+    }
+
+}
