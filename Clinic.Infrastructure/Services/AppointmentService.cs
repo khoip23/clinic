@@ -21,7 +21,7 @@ namespace Clinic.Infrastructure.Services
 
         public async Task<Appointment> CreateAppointmentAsync(int UserId, CreateAppointmentRequestDto request)
         {
-            if(request.DoctorId == null)
+            if (request.DoctorId != null)
             {
                 var DoctorExists = await _context.Users.AnyAsync(u => u.Id == request.DoctorId.Value);
 
