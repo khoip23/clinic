@@ -1,12 +1,15 @@
 using Clinic.Blazor.Components;
+using static System.Net.WebRequestMethods;
 
 namespace Clinic.Blazor
 {
+
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddScoped<ApiService>();
 
             // Add services to the container.
             builder.Services.AddRazorComponents().AddInteractiveServerComponents();

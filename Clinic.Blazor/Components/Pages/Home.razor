@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
+@inject ApiService apiService
 
 <PageTitle>Home</PageTitle>
 
@@ -22,7 +23,7 @@
         {
             var res = await Http.PostAsync("/login", JsonContent.Create(new
             {
-                userName = "cuong",
+                userName = "khoipro",
                 password = "123123"
             }));
             var jo = JsonObject.Parse(await res.Content.ReadAsStringAsync());
@@ -40,15 +41,13 @@
     {
         try
         {
-            var token = await JSRuntime.InvokeAsync<string>("getToken", "access_token");
-            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var res = Http.PostAsync("/api/appointment", JsonContent.Create(new
+            var res = await apiService.PostAsync("/api/appointment", JsonContent.Create(new
             {
                 date = DateTime.Now,
                 time = new TimeSpan(10, 0, 0),
                 doctorId = null as int?
             }));
-            Appointment = await res.Result.Content.ReadAsStringAsync();
+            Appointment = res;
         }
         catch(Exception ex)
         {
