@@ -8,7 +8,7 @@ namespace Clinic.Api.Controllers
         protected int? GetCurrentUserId()
         {
             var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!string.IsNullOrEmpty(idStr) && !int.TryParse(idStr, out var userId))
+            if (!string.IsNullOrEmpty(idStr) && int.TryParse(idStr, out var userId))
             { 
                 return userId; 
             }
