@@ -16,10 +16,10 @@ namespace Clinic.Api.Controllers
             _patientRecordHistoryService = patientRecordHistoryService;
         }
 
-        [HttpGet("history/{patientId}")]
-        public async Task<IActionResult> GetHistory(int patientId)
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetHistory(int userId)
         {
-            var records = await _patientRecordHistoryService.GetPatientRecordHistoryAsync(patientId);
+            var records = await _patientRecordHistoryService.GetPatientRecordHistoryAsync(userId);
             return Ok(records);
         }
     }

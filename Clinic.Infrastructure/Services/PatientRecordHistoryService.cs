@@ -17,17 +17,23 @@ namespace Clinic.Infrastructure.Services
             _context = context;
         }
         
-        public async Task<List<PatientRecordHistoryDto>> GetPatientRecordHistoryAsync(int patientId)
+        public async Task<List<PatientRecordHistoryDto>> GetPatientRecordHistoryAsync(int userId)
         {
-            var query = _context.PatientRecords.Where(r => r.PatientId == patientId);
+            var user = await _context.Users.FindAsync(userId);
+            if(user == null) return new List<PatientRecordHistoryDto>();
 
-            return await query.Select(r => new PatientRecordHistoryDto
-            {
-                PatientRecordId = r.Id,
-                PatientId = r.PatientId,
-                CreatedAt = r.CreatedAt,
-                AppointmentId = r.AppointmentId
-            }).ToListAsync();
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.PhoneNumber == user.PhoneNumber);
+            if(patient == null) return new List<PatientRecordHistoryDto>();
+
+            return await _context.PatientRecords
+                .Where(r => r.PatientId == patient.Id)
+                .Select(r => new PatientRecordHistoryDto
+                {
+                    PatientRecordId = r.Id,
+                    PatientId = r.PatientId,
+                    AppointmentId = r.AppointmentId,
+                    CreatedAt = r.CreatedAt
+                }).ToListAsync();
         }
     }
 }

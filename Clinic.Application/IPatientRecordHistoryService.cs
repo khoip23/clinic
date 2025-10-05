@@ -9,6 +9,6 @@ namespace Clinic.Application
 {
     public interface IPatientRecordHistoryService
     {
-        Task<List<PatientRecordHistoryDto>> GetPatientRecordHistoryAsync(int patientId);
+        Task<List<PatientRecordHistoryDto>> GetPatientRecordHistoryAsync(int userId);
     }
 }
