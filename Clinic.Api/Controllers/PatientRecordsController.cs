@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace Clinic.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/CreatePatientRecord")]
     [Authorize(Roles = "Receptionist")]
     public class PatientRecordsController : ControllerBase
     {
