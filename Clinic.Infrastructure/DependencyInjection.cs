@@ -32,7 +32,7 @@ namespace Clinic.Infrastructure
             services.AddScoped<IAppointmentPatientService, AppointmentsPatientService>();
             services.AddScoped<IAppointmentReceptionistService, AppointmentReceptionistService>();
             services.AddScoped<IPatientRecordService, PatientRecordService>();
-
+            services.AddScoped<IPatientRecordHistoryService, PatientRecordHistoryService>();
         }
 
         public static void MigrateDatabase(this IServiceProvider serviceProvider)
