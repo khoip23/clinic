@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/test/{cateId}/{abc}"
 @using System.Text.Json.Nodes
 @rendermode InteractiveServer
 @inject HttpClient Http
@@ -11,9 +11,32 @@
 <button @onclick="Login">Login</button>
 <button @onclick="TestAuthRequest">Test authorized request</button>
 <p>Token: @Token</p>
+<p>CateId: @cateId</p>
+<p>abc: @abc</p>
 <p>Appointment: @Appointment</p>
+<MudText Typo="Typo.h6">MudBlazor is @Text</MudText>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ButtonOnClick">@ButtonText</MudButton>
+<MudTextField @bind-Value="TextValue" Label="Standard" Variant="Variant.Text" InputType="InputType.Password"></MudTextField>
 
 @code {
+
+    public string Text { get; set; } = "????";
+    public string ButtonText { get; set; } = "Click Me";
+    public int ButtonClicked { get; set; }
+    public string TextValue { get; set; }
+
+    void ButtonOnClick()
+    {
+        ButtonClicked += 1;
+        Text = $"Awesome x {ButtonClicked}";
+        ButtonText = "Click Me Again";
+    }
+
+    [Parameter]
+    public string cateId { get; set; }
+    [Parameter]
+    public string abc { get; set; }
+
     private string Token;
     private string Appointment;
 

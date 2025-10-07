@@ -1,4 +1,5 @@
 using Clinic.Blazor.Components;
+using MudBlazor.Services;
 using static System.Net.WebRequestMethods;
 
 namespace Clinic.Blazor
@@ -13,6 +14,7 @@ namespace Clinic.Blazor
 
             // Add services to the container.
             builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+            builder.Services.AddMudServices();
 
             builder.Services.AddScoped(sp => new HttpClient
             {
