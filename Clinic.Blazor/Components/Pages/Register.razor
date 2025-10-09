@@ -111,7 +111,6 @@
     {
         try
         {
-            // Nếu password nhập lại không khớp thì không cho submit
             if (Password != ReEnterPassword)
             {
                 ErrorMessage = "Passwords do not match.";
@@ -137,7 +136,7 @@
             {
                 ErrorMessage = "";
                 await JSRuntime.InvokeVoidAsync("alert", "Register successful!");
-                // Chuyển hướng login nếu muốn
+                // Chuyển hướng login
                 NavigationManager.NavigateTo("/login");
             }
             else

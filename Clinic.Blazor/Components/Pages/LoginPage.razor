@@ -53,45 +53,6 @@
 
     private async Task Login()
     {
-        try
-        {
-            var loginData = new
-            {
-                UserName = UserName,
-                Password = Password
-            };
-
-            var json = JsonSerializer.Serialize(loginData);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await apiService.PostLoginAsync("https://localhost:7071/api/Auth/login", content);
-
-
-            if (response.IsSuccessStatusCode)
-            {
-                var respContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<Dictionary<string, string>>(respContent);
-
-                if (result != null && result.ContainsKey("access_token"))
-                {
-                    var token = result["access_token"];
-                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "access_token", token);
-
-                    NavigationManager.NavigateTo("/");
-                }
-                else
-                {
-                    ErrorMessage = "Invalid response from server.";
-                }
-            }
-            else
-            {
-                ErrorMessage = "Login failed. Please check username or password.";
-            }
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Error: {ex.Message}";
-        }
+        
     }
 }
