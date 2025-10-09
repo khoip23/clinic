@@ -4,11 +4,12 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @inject ApiService apiService
+@inject NavigationManager NavigationManager
 <h1>REGISTER</h1>
 <div class="container">
     <MudTextField @bind-Value="FullName" Label="FullName" Variant="Variant.Outlined"></MudTextField>
     <MudTextField @bind-Value="PhoneNumber" Label="PhoneNumber" Variant="Variant.Outlined"></MudTextField>
-    <MudTextField @bind-Value="Address" Label="Address" Variant="Variant.Outlined"></MudTextField>
+    
     <MudTextField @bind-Value="UserName" Label="UserName" Variant="Variant.Outlined"></MudTextField>
     <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
     <MudTextField @bind-Value="ReEnterPassword"
@@ -21,16 +22,31 @@
                   AdornmentAriaLabel="Show Re-enter Password"
                   For="@(() => ReEnterPassword)"
                   Validation="ValidateRePassword" />
+    <MudDatePicker @bind-Date="DOB"
+                   Label="Date of Birth"
+                   Variant="Variant.Outlined"
+                   PickerVariant="PickerVariant.Dialog"
+                   OpenTo="OpenTo.Date"
+                   Editable="false"
+                   DisableToolbar="false"
+                   CloseOnSelection="true" />
+
 
     <MudText Typo="Typo.body2" Color="Color.Error">@ErrorMessage</MudText>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary">Create</MudButton>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="SubmitRegister"
+               Class="mt-3"
+               FullWidth="true">
+        Create
+    </MudButton>
 </div>
 
 @code {
     public string FullName { get; set; }
     public string PhoneNumber { get; set; }
-    public string Address { get; set; }
+    public DateTime? DOB = DateTime.Today;
     public string UserName { get; set; }
     public string Password { get; set; } = "";
     public string ReEnterPassword { get; set; }
@@ -88,6 +104,51 @@
             isShowReEnter = true;
             ReEnterPasswordIcon = Icons.Material.Filled.Visibility;
             ReEnterPasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task SubmitRegister()
+    {
+        try
+        {
+            // Nếu password nhập lại không khớp thì không cho submit
+            if (Password != ReEnterPassword)
+            {
+                ErrorMessage = "Passwords do not match.";
+                return;
+            }
+
+            var payload = new
+            {
+                UserName = UserName,
+                Password = Password,
+                FullName = FullName,
+                Role = 1,
+                DOB = DOB ?? DateTime.Today,
+                PhoneNumber = PhoneNumber
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await apiService.PostAsync("api/register/register", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ErrorMessage = "";
+                await JSRuntime.InvokeVoidAsync("alert", "Register successful!");
+                // Chuyển hướng login nếu muốn
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ErrorMessage = $"Register failed: {error}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
         }
     }
 }

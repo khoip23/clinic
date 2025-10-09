@@ -1,0 +1,97 @@
+﻿@page "/login"
+@using System.Text.Json.Nodes
+@using System.Text.Json
+@using System.Text
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject ApiService apiService
+@inject NavigationManager NavigationManager
+
+<h3>Login</h3>
+<div class="container">
+    <MudTextField @bind-Value="UserName" Label="UserName" Variant="Variant.Outlined"></MudTextField>
+    <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+</div>
+<div class="container" style="display: flex; gap: 10px;">
+    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/register"))">
+        Create one!
+    </MudButton>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="Login"
+               Class="mt-3"
+               FullWidth="true">
+        Sign in
+    </MudButton>
+</div>
+
+@code {
+    public string UserName { get; set; }
+    public string Password { get; set; } = "";
+    string ErrorMessage = "";
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ButtonTestclick()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task Login()
+    {
+        try
+        {
+            var loginData = new
+            {
+                UserName = UserName,
+                Password = Password
+            };
+
+            var json = JsonSerializer.Serialize(loginData);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await apiService.PostLoginAsync("https://localhost:7071/api/Auth/login", content);
+
+
+            if (response.IsSuccessStatusCode)
+            {
+                var respContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<Dictionary<string, string>>(respContent);
+
+                if (result != null && result.ContainsKey("access_token"))
+                {
+                    var token = result["access_token"];
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "access_token", token);
+
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    ErrorMessage = "Invalid response from server.";
+                }
+            }
+            else
+            {
+                ErrorMessage = "Login failed. Please check username or password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
+    }
+}

@@ -8,8 +8,8 @@
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
-<button @onclick="Login">Login</button>
-<button @onclick="TestAuthRequest">Test authorized request</button>
+<button @onclick="Logintest">Login</button>
+@* <button @onclick="TestAuthRequest">Test authorized request</button> *@
 <p>Token: @Token</p>
 <p>CateId: @cateId</p>
 <p>abc: @abc</p>
@@ -40,7 +40,7 @@
     private string Token;
     private string Appointment;
 
-    private async Task Login()
+    private async Task Logintest()
     {
         try
         {
@@ -60,22 +60,22 @@
         }
     }
 
-    private async Task TestAuthRequest()
-    {
-        try
-        {
-            var res = await apiService.PostAsync("/api/appointment", JsonContent.Create(new
-            {
-                date = DateTime.Now,
-                time = new TimeSpan(10, 0, 0),
-                doctorId = null as int?
-            }));
-            Appointment = res;
-        }
-        catch(Exception ex)
-        {
+    // private async Task TestAuthRequest()
+    // {
+    //     try
+    //     {
+    //         var res = await apiService.PostAsync("/api/appointment", JsonContent.Create(new
+    //         {
+    //             date = DateTime.Now,
+    //             time = new TimeSpan(10, 0, 0),
+    //             doctorId = null as int?
+    //         }));
+    //         Appointment = res;
+    //     }
+    //     catch(Exception ex)
+    //     {
             
-        }
-    }
+    //     }
+    // }
 
 }

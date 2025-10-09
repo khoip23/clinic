@@ -29,8 +29,9 @@ namespace Clinic.Infrastructure.Services
             var user = new User
             {
                 PhoneNumber = dto.PhoneNumber,
-                UserName = dto.UserName,
                 FullName = dto.FullName,
+                DOB = dto.DOB,
+                UserName = dto.UserName,
                 Password = PasswordHelper.HashPassword(dto.Password),
                 Role = (int)RoleType.Patient
             };
