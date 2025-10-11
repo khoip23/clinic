@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clinic.Api.Controllers
 {
+    [Route("api/login")]
+    [ApiController]
     public class LoginController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -22,7 +24,7 @@ namespace Clinic.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto dto, [FromServices] IConfiguration config)
         {
             if (string.IsNullOrWhiteSpace(dto.UserName) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest(new { message = "Username hoặc password không được để trống" });
+                return BadRequest(new { message = "Username or password cannot be blank" });
 
             try
             {

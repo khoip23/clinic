@@ -24,6 +24,9 @@
                FullWidth="true">
         Sign in
     </MudButton>
+
+    <MudAlert Typo="Typo.body2" Color="Color.Error">@ErrorMessage</MudAlert>
+
 </div>
 
 @code {
@@ -53,6 +56,34 @@
 
     private async Task Login()
     {
-        
+        try
+        {
+            var payload = new
+            {
+                UserName = UserName,
+                Password = Password
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await apiService.PostAsync("/api/login/login", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", "Login successful!");
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ErrorMessage = $"Login failed: {error}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
     }
 }

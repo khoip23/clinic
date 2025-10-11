@@ -30,11 +30,11 @@ namespace Clinic.Infrastructure.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
             if (user == null)
-                throw new Exception("User not found");
+                throw new UnauthorizedAccessException("User not found");
 
             // Kiểm tra password
             if (!PasswordHelper.VerifyPassword(dto.Password, user.Password))
-                throw new Exception("Invalid password");
+                throw new UnauthorizedAccessException("Invalid password");
 
             var role = (RoleType)user.Role;
 
