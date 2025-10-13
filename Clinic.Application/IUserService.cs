@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Clinic.Application.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace Clinic.Application
 {
     public interface IUserService
     {
-        Task<int> RegisterUserAsync(DTOs.DTOs dto);
+        Task<RegisterResponeDto> RegisterUserAsync(DTOs.RegisterUserDto dto);
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.JSInterop;
+using System.Net.Http.Headers;
 
 namespace Clinic.Blazor
 {
@@ -13,12 +14,20 @@ namespace Clinic.Blazor
             //var a = new ApiService(null, null);
             //a.PostAsync();
         }
-        public async Task<string> PostAsync(string url, HttpContent? content)
+        public async Task<HttpResponseMessage> PostAsync(string url, HttpContent? content = null, bool useToken = true) // default value
         {
-            var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var res = await httpClient.PostAsync(url, content);
-            return await res.Content.ReadAsStringAsync();
+            if (useToken == true)
+            {
+                var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token);
+                }
+            }
+            return await httpClient.PostAsync(url, content);
+
         }
+
     }
 }

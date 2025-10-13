@@ -1,0 +1,194 @@
+﻿@page "/register"
+@using System.Text.Json.Nodes
+@using Clinic.Blazor.DTOs
+@using Newtonsoft.Json
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject ApiService apiService
+@inject NavigationManager NavigationManager
+<h1>REGISTER</h1>
+<div class="container">
+    <MudTextField @bind-Value="FullName" Label="FullName" Variant="Variant.Outlined"></MudTextField>
+    <MudTextField @bind-Value="PhoneNumber" Label="PhoneNumber" Variant="Variant.Outlined"></MudTextField>
+    
+    <MudTextField @bind-Value="UserName" Label="UserName" Variant="Variant.Outlined"></MudTextField>
+    <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+    <MudTextField @bind-Value="ReEnterPassword"
+                  Label="Re-enter Password"
+                  Variant="Variant.Outlined"
+                  InputType="@ReEnterPasswordInput"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@ReEnterPasswordIcon"
+                  OnAdornmentClick="ToggleReEnterPassword"
+                  AdornmentAriaLabel="Show Re-enter Password"
+                  For="@(() => ReEnterPassword)"
+                  Validation="ValidateRePassword" />
+    <MudDatePicker @bind-Date="DOB"
+                   Label="Date of Birth"
+                   Variant="Variant.Outlined"
+                   PickerVariant="PickerVariant.Dialog"
+                   OpenTo="OpenTo.Date"
+                   Editable="false"
+                   DisableToolbar="false"
+                   CloseOnSelection="true" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="SubmitRegister"
+               Class="mt-3"
+               FullWidth="true">
+        Create
+    </MudButton>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error"
+                  Variant="Variant.Filled"
+                  Elevation="1"
+                  Class="rounded-xl text-center"
+                  Style="width: 100%;">
+            @ErrorMessage
+        </MudAlert>
+    }
+</div>
+
+@code {
+    public string FullName { get; set; }
+    public string PhoneNumber { get; set; }
+    public DateTime? DOB = DateTime.Today;
+    public string UserName { get; set; }
+    public string Password { get; set; } = "";
+    public string ReEnterPassword { get; set; }
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    string ErrorMessage = "";
+
+    void ButtonTestclick()
+    {
+        if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    string ValidateRePassword(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ErrorMessage = "Please re-enter password.";
+            return ErrorMessage;
+        }
+        if (value != Password)
+        {
+            ErrorMessage = "Passwords do not match.";
+            return ErrorMessage;
+        }
+        ErrorMessage = "";
+        return null; // null => hợp lệ
+    }
+    bool isShowReEnter;
+    InputType ReEnterPasswordInput = InputType.Password;
+    string ReEnterPasswordIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ToggleReEnterPassword()
+    {
+        if (isShowReEnter)
+        {
+            isShowReEnter = false;
+            ReEnterPasswordIcon = Icons.Material.Filled.VisibilityOff;
+            ReEnterPasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShowReEnter = true;
+            ReEnterPasswordIcon = Icons.Material.Filled.Visibility;
+            ReEnterPasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task SubmitRegister()
+    {
+        try
+        {
+            if(string.IsNullOrWhiteSpace(FullName))
+            {
+                ErrorMessage = "Full Name cannot be blank!";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(PhoneNumber))
+            {
+                ErrorMessage = "PhoneNumber cannot be blank!";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(UserName))
+            {
+                ErrorMessage = "UserName cannot be blank!";
+                return;
+            }
+
+            if (Password != ReEnterPassword)
+            {
+                ErrorMessage = "Passwords do not match.";
+                return;
+            }
+
+            var payload = new
+            {
+                UserName = UserName,
+                Password = Password,
+                FullName = FullName,
+                Role = 1,
+                DOB = DOB ?? DateTime.Today,
+                PhoneNumber = PhoneNumber
+            };
+
+            var json = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await apiService.PostAsync("api/register/register", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<RegisterUserDto>(jsonResponse);
+                if (dto == null)
+                {
+                    ErrorMessage = "Error server";
+                }
+                else if (dto.IsSuccess)
+                {
+                    await JSRuntime.InvokeAsync<string>("setToken", "access_token");
+                    await JSRuntime.InvokeVoidAsync("alert", "Register successful!");
+                    NavigationManager.NavigateTo("/login");
+                }
+                else
+                {
+                    ErrorMessage = dto.ErrorMessage;
+                }
+            }
+            else
+            {
+                var errorJson = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<RegisterUserDto>(errorJson);
+                ErrorMessage = $"Register failed: {dto?.ErrorMessage ?? "Unknown error"}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
+    }
+}

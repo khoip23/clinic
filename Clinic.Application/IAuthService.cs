@@ -9,6 +9,6 @@ namespace Clinic.Application
 {
     public interface IAuthService
     {
-        Task<ResponseDto> LoginAsync(LoginDto dto);
+        Task<LoginResponseDto> LoginAsync(LoginDto dto);
     }
 }
