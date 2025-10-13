@@ -21,20 +21,14 @@ namespace Clinic.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto, [FromServices] IConfiguration config)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.UserName) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest(new { message = "Username or password cannot be blank" });
+            var response = await _authService.LoginAsync(dto);
 
-            try
-            {
-                var response = await _authService.LoginAsync(dto);
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
+            if (!response.IsSuccess)
+                return BadRequest(response);
+
+            return Ok(response);
         }
     }
     

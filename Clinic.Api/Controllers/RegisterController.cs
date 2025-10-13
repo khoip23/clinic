@@ -1,12 +1,13 @@
-﻿using Clinic.Application;
+﻿using BCrypt.Net;
+using Clinic.Application;
+using Clinic.Application.DTOs;
+using Clinic.Domain;
 using Clinic.Domain.Entities;
 using Clinic.Infrastructure;
+using Clinic.Infrastructure.Helpers;
+using Clinic.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
-using Clinic.Domain;
-using Clinic.Infrastructure.Helpers;
-using Clinic.Application.DTOs;
 
 namespace Clinic.Api.Controllers
 {
@@ -22,17 +23,14 @@ namespace Clinic.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] DTOs dto)
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto)
         {
-            try
-            {
-                var userId = await _userService.RegisterUserAsync(dto);
-                return Ok(new { message = "Tạo tài khoản thành công!", UserId = userId });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var response = await _userService.RegisterUserAsync(dto);
+
+            if(!response.IsSuccess)
+                return BadRequest(response);
+
+            return Ok(response);
         }
     }
 }

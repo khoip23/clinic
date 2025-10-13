@@ -1,5 +1,7 @@
 ﻿@page "/register"
 @using System.Text.Json.Nodes
+@using Clinic.Blazor.DTOs
+@using Newtonsoft.Json
 @rendermode InteractiveServer
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
@@ -31,9 +33,6 @@
                    DisableToolbar="false"
                    CloseOnSelection="true" />
 
-
-    <MudText Typo="Typo.body2" Color="Color.Error">@ErrorMessage</MudText>
-
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
                OnClick="SubmitRegister"
@@ -41,6 +40,17 @@
                FullWidth="true">
         Create
     </MudButton>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error"
+                  Variant="Variant.Filled"
+                  Elevation="1"
+                  Class="rounded-xl text-center"
+                  Style="width: 100%;">
+            @ErrorMessage
+        </MudAlert>
+    }
 </div>
 
 @code {
@@ -111,6 +121,24 @@
     {
         try
         {
+            if(string.IsNullOrWhiteSpace(FullName))
+            {
+                ErrorMessage = "Full Name cannot be blank!";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(PhoneNumber))
+            {
+                ErrorMessage = "PhoneNumber cannot be blank!";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(UserName))
+            {
+                ErrorMessage = "UserName cannot be blank!";
+                return;
+            }
+
             if (Password != ReEnterPassword)
             {
                 ErrorMessage = "Passwords do not match.";
@@ -127,21 +155,35 @@
                 PhoneNumber = PhoneNumber
             };
 
-            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var json = JsonConvert.SerializeObject(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
             var response = await apiService.PostAsync("api/register/register", content);
 
             if (response.IsSuccessStatusCode)
             {
-                ErrorMessage = "";
-                await JSRuntime.InvokeVoidAsync("alert", "Register successful!");
-                NavigationManager.NavigateTo("/login");
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<RegisterUserDto>(jsonResponse);
+                if (dto == null)
+                {
+                    ErrorMessage = "Error server";
+                }
+                else if (dto.IsSuccess)
+                {
+                    await JSRuntime.InvokeAsync<string>("setToken", "access_token");
+                    await JSRuntime.InvokeVoidAsync("alert", "Register successful!");
+                    NavigationManager.NavigateTo("/login");
+                }
+                else
+                {
+                    ErrorMessage = dto.ErrorMessage;
+                }
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                ErrorMessage = $"Register failed: {error}";
+                var errorJson = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<RegisterUserDto>(errorJson);
+                ErrorMessage = $"Register failed: {dto?.ErrorMessage ?? "Unknown error"}";
             }
         }
         catch (Exception ex)

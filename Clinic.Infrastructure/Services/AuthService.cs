@@ -26,15 +26,34 @@ namespace Clinic.Infrastructure.Services
             _config = config;
         }
 
-        public async Task<ResponseDto> LoginAsync(LoginDto dto)
+        public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.UserName))
+                return new LoginResponseDto
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "UserName cannot be blank!"
+                };
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return new LoginResponseDto
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Password cannot be blank!"
+                };
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
             if (user == null)
-                throw new UnauthorizedAccessException("User not found");
-
+                return new LoginResponseDto 
+                { 
+                    IsSuccess = false,
+                    ErrorMessage = "User not found!"
+                };
             // Kiểm tra password
             if (!PasswordHelper.VerifyPassword(dto.Password, user.Password))
-                throw new UnauthorizedAccessException("Invalid password");
+                return new LoginResponseDto
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Incorrect password!"
+                };
 
             var role = (RoleType)user.Role;
 
@@ -56,11 +75,12 @@ namespace Clinic.Infrastructure.Services
                 expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
                 signingCredentials: creds);
 
-            return new ResponseDto
+            return new LoginResponseDto
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 FullName = user.FullName,
-                Role = user.Role.ToString()
+                Role = user.Role.ToString(),
+                IsSuccess = true,
             };
         }
     }

@@ -14,21 +14,19 @@ namespace Clinic.Blazor
             //var a = new ApiService(null, null);
             //a.PostAsync();
         }
-        public async Task<HttpResponseMessage> PostAsync(string url, HttpContent? content)
+        public async Task<HttpResponseMessage> PostAsync(string url, HttpContent? content = null, bool useToken = true) // default value
         {
-            var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
-            if (!string.IsNullOrEmpty(token))
+            if (useToken == true)
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
+                var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token);
+                }
             }
+            return await httpClient.PostAsync(url, content);
 
-            return await httpClient.PostAsync(url, content);
-        }
-        public async Task<HttpResponseMessage> PostLoginAsync(string url, HttpContent? content)
-        {
-            // login không c?n Authorization header
-            return await httpClient.PostAsync(url, content);
         }
 
     }

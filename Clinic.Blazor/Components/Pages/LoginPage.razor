@@ -1,7 +1,7 @@
 ﻿@page "/login"
-@using System.Text.Json.Nodes
-@using System.Text.Json
 @using System.Text
+@using Clinic.Blazor.DTOs
+@using Newtonsoft.Json
 @rendermode InteractiveServer
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
@@ -13,20 +13,35 @@
     <MudTextField @bind-Value="UserName" Label="UserName" Variant="Variant.Outlined"></MudTextField>
     <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
 </div>
-<div class="container" style="display: flex; gap: 10px;">
-    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/register"))">
-        Create one!
-    </MudButton>
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               OnClick="Login"
-               Class="mt-3"
-               FullWidth="true">
-        Sign in
-    </MudButton>
+<div style="display: flex; flex-direction: column; align-items: stretch; gap: 12px; width: 100%; max-width: 400px; margin: auto;">
+    <div style="display: flex; gap: 10px;">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   OnClick="@(() => NavigationManager.NavigateTo("/register"))"
+                   Class="rounded-xl font-weight-bold"
+                   Style="flex: 1; max-width: 20%;">
+            Create
+        </MudButton>
 
-    <MudAlert Typo="Typo.body2" Color="Color.Error">@ErrorMessage</MudAlert>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="Login"
+                   Class="rounded-xl font-weight-bold"
+                   Style="flex: 4; max-width: 80%;">
+            Sign in
+        </MudButton>
+    </div>
 
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error"
+                  Variant="Variant.Filled"
+                  Elevation="1"
+                  Class="rounded-xl text-center"
+                  Style="width: 100%;">
+            @ErrorMessage
+        </MudAlert>
+    }
 </div>
 
 @code {
@@ -54,31 +69,79 @@
         }
     }
 
+    /*
+    Serialize: verb => biến đổi 1 kiểu dữ liệu thành 1 kiểu dữ liệu chung (JSON, XML, .....) mà có thể vận chuyển qua internet
+    Deserialize: verb => JSON => Object/class...
+
+    chieu di: UI => object => serialize => JSON/XML,... => internet => Backend => JSON => deserialize => object  => xu ly
+    chieu ve: Backend xu ly xong => object => serialize => JSON => internet => UI nhan JSON => des => object
+     *
+     */
+
     private async Task Login()
     {
         try
         {
+            if(string.IsNullOrWhiteSpace(UserName))
+            {
+                ErrorMessage = "UserName cannot be blank!";
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Password cannot be blank!";
+                return;
+            }
             var payload = new
             {
                 UserName = UserName,
                 Password = Password
             };
+            var json = JsonConvert.SerializeObject(payload);
+            
 
-            var json = JsonSerializer.Serialize(payload);
+            var errorload = new
+            {
+                ErrorMessage = ErrorMessage
+            };
+            var ErrorMessageJson = JsonConvert.SerializeObject(errorload);
+
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await apiService.PostAsync("/api/login/login", content);
+            var response = await apiService.PostAsync("/api/login/login", content, false);
 
-            if (response.IsSuccessStatusCode)
+            // Error handling
+            // 1 api phai handle 2 viec
+            // API thanh cong
+            //  IsSuccess
+            // API that bai
+            if (response.IsSuccessStatusCode) // response.StatusCode 2xx
             {
-                var result = await response.Content.ReadAsStringAsync();
-                await JSRuntime.InvokeVoidAsync("alert", "Login successful!");
-                NavigationManager.NavigateTo("/");
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<LoginResponseDto>(jsonResponse);
+                // neu dto null => set ErrorMessage là "Lỗi server"
+                // neu IsSuccess = true => Set token vao storage => Navigate to home page
+                // false => set ErrorMessage
+                if (dto == null)
+                {
+                    ErrorMessage = "Error server";
+                }
+                else if (dto.IsSuccess)
+                {
+                    await JSRuntime.InvokeAsync<string>("setToken", "access_token", dto.Token);
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    ErrorMessage = dto.ErrorMessage;
+                }                              
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                ErrorMessage = $"Login failed: {error}";
+                
+                var errorJson = await response.Content.ReadAsStringAsync();
+                var dto = JsonConvert.DeserializeObject<LoginResponseDto>(errorJson);
+                ErrorMessage = $"Login failed: {dto?.ErrorMessage ?? "Unknown error"}";
             }
         }
         catch (Exception ex)
