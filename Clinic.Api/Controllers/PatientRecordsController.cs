@@ -1,6 +1,6 @@
 ﻿using Clinic.Application;
 using Clinic.Application.DTOs;
-using Clinic.Infrastructure.Services;
+using Clinic.Application.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

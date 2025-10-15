@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Application
+namespace Clinic.Application.Interface
 {
-    public interface IUserService
+    public interface IPatientRecordHistoryService
     {
-        Task<RegisterResponeDto> RegisterUserAsync(DTOs.RegisterUserDto dto);
+        Task<List<PatientRecordHistoryDto>> GetPatientRecordHistoryAsync(int userId);
     }
 }

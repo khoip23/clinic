@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Application
+namespace Clinic.Application.Interface
 {
-    public interface IAuthService
+    public interface IRegisterUserService
     {
-        Task<LoginResponseDto> LoginAsync(LoginDto dto);
+        Task<RegisterResponeDto> RegisterUserAsync(RegisterUserDto dto);
     }
 }

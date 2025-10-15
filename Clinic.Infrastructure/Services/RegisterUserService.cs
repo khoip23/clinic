@@ -1,5 +1,4 @@
-﻿using Clinic.Application;
-using Clinic.Domain.Entities;
+﻿using Clinic.Domain.Entities;
 using Clinic.Domain;
 using Clinic.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -9,14 +8,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 
 namespace Clinic.Infrastructure.Services
 {
-    public class UserService : IUserService
+    public class RegisterUserService : IRegisterUserService
     {
         private readonly ClinicDbContext _context;
 
-        public UserService(ClinicDbContext context)
+        public RegisterUserService(ClinicDbContext context)
         {
             _context = context;
         }

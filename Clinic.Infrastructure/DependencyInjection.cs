@@ -1,4 +1,4 @@
-﻿using Clinic.Application;
+﻿using Clinic.Application.Interface;
 using Clinic.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,12 +27,13 @@ namespace Clinic.Infrastructure
             // Đăng ký AuthService
             services.AddScoped<IAuthService, AuthService>();
 
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRegisterUserService, RegisterUserService>();
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IAppointmentPatientService, AppointmentsPatientService>();
             services.AddScoped<IAppointmentReceptionistService, AppointmentReceptionistService>();
             services.AddScoped<IPatientRecordService, PatientRecordService>();
             services.AddScoped<IPatientRecordHistoryService, PatientRecordHistoryService>();
+            services.AddScoped<IEmployeeListService, EmployeeService>();
         }
 
         public static void MigrateDatabase(this IServiceProvider serviceProvider)

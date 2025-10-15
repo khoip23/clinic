@@ -1,6 +1,6 @@
 ﻿using BCrypt.Net;
-using Clinic.Application;
 using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Clinic.Domain;
 using Clinic.Domain.Entities;
 using Clinic.Infrastructure;
@@ -15,9 +15,9 @@ namespace Clinic.Api.Controllers
     [ApiController]
     public class RegisterController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IRegisterUserService _userService;
 
-        public RegisterController(IUserService userService)
+        public RegisterController(IRegisterUserService userService)
         {
             _userService = userService;
         }

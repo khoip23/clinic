@@ -1,5 +1,5 @@
-﻿using Clinic.Application;
-using Clinic.Application.DTOs;
+﻿using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Clinic.Domain;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,7 +21,7 @@ namespace Clinic.Infrastructure.Services
         public async Task<List<AppointmentPatientDto>> GetAppointmentsForPatientAsync(int patientId, StatusAppointment? status = StatusAppointment.Active)
         {
             var query = _context.Appointments
-        .Where(a => a.UserId == patientId);
+                        .Where(a => a.UserId == patientId);
 
             if (status.HasValue)
             {

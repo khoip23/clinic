@@ -1,5 +1,5 @@
-﻿using Clinic.Application;
-using Clinic.Application.DTOs;
+﻿using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Clinic.Domain;
 using Clinic.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
