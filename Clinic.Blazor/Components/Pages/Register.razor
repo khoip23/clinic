@@ -13,7 +13,7 @@
     <MudTextField @bind-Value="PhoneNumber" Label="PhoneNumber" Variant="Variant.Outlined"></MudTextField>
     
     <MudTextField @bind-Value="UserName" Label="UserName" Variant="Variant.Outlined"></MudTextField>
-    <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+    <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ShowPassword" AdornmentAriaLabel="Show Password" />
     <MudTextField @bind-Value="ReEnterPassword"
                   Label="Re-enter Password"
                   Variant="Variant.Outlined"
@@ -37,7 +37,8 @@
                Color="Color.Primary"
                OnClick="SubmitRegister"
                Class="mt-3"
-               FullWidth="true">
+               FullWidth="true"
+               style="margin-top: 16px;">
         Create
     </MudButton>
 
@@ -47,7 +48,7 @@
                   Variant="Variant.Filled"
                   Elevation="1"
                   Class="rounded-xl text-center"
-                  Style="width: 100%;">
+                  Style="width: 100%; margin-top: 16px;">
             @ErrorMessage
         </MudAlert>
     }
@@ -66,7 +67,7 @@
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
     string ErrorMessage = "";
 
-    void ButtonTestclick()
+    void ShowPassword()
     {
         if (isShow)
         {
