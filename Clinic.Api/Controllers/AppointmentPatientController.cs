@@ -1,5 +1,5 @@
-﻿using Clinic.Application;
-using Clinic.Application.DTOs;
+﻿using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Clinic.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +26,7 @@ namespace Clinic.Api.Controllers
             // validation
             if (patientId == null)
             { 
-                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" }); 
+                return Unauthorized(new { message = "User information not found" }); 
             }    
             var appointmentPatient = await _appointmentPatientService.GetAppointmentsForPatientAsync(patientId.Value, status);
             return Ok(appointmentPatient);

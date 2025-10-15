@@ -1,4 +1,4 @@
-﻿using Clinic.Application;
+﻿using Clinic.Application.Interface;
 using Clinic.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,7 +24,7 @@ namespace Clinic.Api.Controllers
             var userId = GetCurrentUserId();
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
+                return Unauthorized(new { message = "User information not found" });
             }
 
             var records = await _patientRecordHistoryService.GetPatientRecordHistoryAsync(userId.Value);

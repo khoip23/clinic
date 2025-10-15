@@ -1,5 +1,5 @@
-﻿using Clinic.Application;
-using Clinic.Application.DTOs;
+﻿using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,5 @@
-﻿using Clinic.Application;
-using Clinic.Application.DTOs;
+﻿using Clinic.Application.DTOs;
+using Clinic.Application.Interface;
 using Clinic.Domain;
 using Clinic.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,7 @@ namespace Clinic.Infrastructure.Services
 
                 if(!DoctorExists)
                 {
-                    throw new KeyNotFoundException("Không tìm thấy bác sĩ tương ứng");
+                    throw new KeyNotFoundException("No matching doctor found");
                 }    
             }
 

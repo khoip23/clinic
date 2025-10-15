@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Application
+namespace Clinic.Application.Interface
 {
     public interface IPatientRecordHistoryService
     {

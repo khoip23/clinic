@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clinic.Application
+namespace Clinic.Application.Interface
 {
     public interface IUserService
     {
-        Task<RegisterResponeDto> RegisterUserAsync(DTOs.RegisterUserDto dto);
+        Task<RegisterResponeDto> CreateUserAsync(RegisterUserDto dto);
+        Task<RegisterResponeDto> UpdateEmployeeAsync(int userId, UpdateUserDto dto);
     }
 }

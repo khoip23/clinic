@@ -1,4 +1,4 @@
-﻿using Clinic.Application;
+﻿using Clinic.Application.Interface;
 using Clinic.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
