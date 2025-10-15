@@ -9,7 +9,7 @@ namespace Clinic.Api.Controllers
 {
     [ApiController]
     [Route("api/appointment")]
-    public class AppointmentController : ControllerBase
+    public class AppointmentController : ClinicBaseController
     {
         private readonly IAppointmentService _appointmentService;
         public AppointmentController(IAppointmentService appointmentService) 
@@ -23,13 +23,14 @@ namespace Clinic.Api.Controllers
         {
             try
             {
-                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (!int.TryParse(userIdString, out int UserId))
+                var UserId = GetCurrentUserId();
+                // validation
+                if (UserId == null)
                 {
-                    return Unauthorized(new { message = "Invalid or missing user ID in token" });
+                    return Unauthorized(new { message = "User information not found" });
                 }
 
-                var appointment = await _appointmentService.CreateAppointmentAsync(UserId, request);
+                var appointment = await _appointmentService.CreateAppointmentAsync(UserId.Value, request);
 
                 return Ok(appointment);
             }

@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Clinic.Application.Interface
 {
-    public interface IRegisterUserService
+    public interface IUserService
     {
-        Task<RegisterResponeDto> RegisterUserAsync(RegisterUserDto dto);
+        Task<RegisterResponeDto> CreateUserAsync(RegisterUserDto dto);
+        Task<RegisterResponeDto> UpdateEmployeeAsync(int userId, UpdateUserDto dto);
     }
 }

@@ -10,7 +10,7 @@ namespace Clinic.Api.Controllers
     [ApiController]
     [Route("api/CreatePatientRecord")]
     [Authorize(Roles = "Receptionist")]
-    public class PatientRecordsController : ControllerBase
+    public class PatientRecordsController : ClinicBaseController
     {
         private readonly IPatientRecordService _patientRecordService;
 
@@ -24,13 +24,11 @@ namespace Clinic.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreatePatientRecordInputDto input)
         {
             // Lấy id user đang đăng nhập (nhân viên tiếp nhận)
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out var receivedBy))
-            {
-                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
-            }
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "User information not found" });
 
-            var result = await _patientRecordService.CreatePatientRecordAsync(input, receivedBy);
+            var result = await _patientRecordService.CreatePatientRecordAsync(input, userId.Value);
             return Ok(result);
         }
     }

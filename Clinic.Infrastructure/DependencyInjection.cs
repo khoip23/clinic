@@ -27,7 +27,7 @@ namespace Clinic.Infrastructure
             // Đăng ký AuthService
             services.AddScoped<IAuthService, AuthService>();
 
-            services.AddScoped<IRegisterUserService, RegisterUserService>();
+            services.AddScoped<IUserService, RegisterUserService>();
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IAppointmentPatientService, AppointmentsPatientService>();
             services.AddScoped<IAppointmentReceptionistService, AppointmentReceptionistService>();

@@ -6,6 +6,7 @@ using Clinic.Domain.Entities;
 using Clinic.Infrastructure;
 using Clinic.Infrastructure.Helpers;
 using Clinic.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,19 +16,34 @@ namespace Clinic.Api.Controllers
     [ApiController]
     public class RegisterController : ControllerBase
     {
-        private readonly IRegisterUserService _userService;
+        private readonly IUserService _registerUserService;
 
-        public RegisterController(IRegisterUserService userService)
+        public RegisterController(IUserService registerUserService)
         {
-            _userService = userService;
+            _registerUserService = registerUserService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto)
+        [HttpPost("patient")]
+        public async Task<IActionResult> RegisterPatient([FromBody] RegisterUserDto dto)
         {
-            var response = await _userService.RegisterUserAsync(dto);
+            if (dto.Role != RoleType.Patient)
+                return BadRequest("Role not matching");
+
+            var response = await _registerUserService.CreateUserAsync(dto);
 
             if(!response.IsSuccess)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
+
+        [HttpPost("employee")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RegisterEmployee([FromBody] RegisterUserDto dto)
+        {
+            var response = await _registerUserService.CreateUserAsync(dto);
+
+            if (!response.IsSuccess)
                 return BadRequest(response);
 
             return Ok(response);
