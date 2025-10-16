@@ -1,0 +1,79 @@
+﻿@page "/employee"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@using System.Text
+@using Clinic.Blazor.DTOs
+@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject ApiService apiService
+@inject NavigationManager Navigation
+
+
+<h3>Employee</h3>
+<h3 class="mb-4">Danh sách nhân viên</h3>
+
+
+@* cái này xài AI TẠO THỬ 1 CÁI TABLE ĐỂ TEST COI CÓ ĐÚNG CÁI HÀM ONINIT KHÔNG *@
+<MudPaper Class="pa-4">
+    @if (EmployeeList == null)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        <p>Đang tải dữ liệu...</p>
+    }
+    else if (EmployeeList.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">Không có nhân viên nào trong hệ thống.</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="EmployeeList" Hover="true" Bordered="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Tên đăng nhập</MudTh>
+                <MudTh>Họ tên</MudTh>
+                <MudTh>Sinh nhật</MudTh>
+                <MudTh>Số điện thoại</MudTh>
+                <MudTh>Mật khẩu</MudTh>
+                <MudTh>Chức vụ</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">@context.Id</MudTd>
+                <MudTd DataLabel="Tên đăng nhập">@context.UserName</MudTd>
+                <MudTd DataLabel="Họ tên">@context.FullName</MudTd>
+                <MudTd DataLabel="Sinh nhật">@context.DOB</MudTd>
+                <MudTd DataLabel="Số điện thoại">@context.PhoneNumber</MudTd>
+                <MudTd DataLabel="Mật khẩu">@context.Password</MudTd>
+                <MudTd DataLabel="Chức vụ">@context.Role</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudPaper>
+
+@code {
+    private List<EmployeeDto>? EmployeeList; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+
+            var response = await apiService.GetAsync("/api/employee/list-employees");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                EmployeeList = JsonConvert.DeserializeObject<List<EmployeeDto>>(json);
+            }
+            else
+            {
+                EmployeeList = new List<EmployeeDto>();
+            }
+        }
+        catch (Exception)
+        {
+            EmployeeList = new List<EmployeeDto>();
+        }
+    }
+}

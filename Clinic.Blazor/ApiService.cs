@@ -29,5 +29,17 @@ namespace Clinic.Blazor
 
         }
 
+        public async Task<HttpResponseMessage> GetAsync(string url) 
+        {
+            var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
+            return await httpClient.GetAsync(url);
+
+        }
+
     }
 }

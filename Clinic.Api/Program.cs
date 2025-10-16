@@ -109,4 +109,4 @@ app.UseCors("AllowBlazorDev");
 
 app.MapControllers();
 
-app.Run();
+app.Run();  
