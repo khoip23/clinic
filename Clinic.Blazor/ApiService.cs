@@ -29,7 +29,7 @@ namespace Clinic.Blazor
 
         }
 
-        public async Task<HttpResponseMessage> GetAsync(string url) 
+        public async Task<HttpResponseMessage> GetAsync(string url, HttpContent? content = null) 
         {
             var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
             if (!string.IsNullOrEmpty(token))

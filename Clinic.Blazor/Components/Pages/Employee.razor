@@ -1,22 +1,21 @@
 ﻿@page "/employee"
-@* @attribute [Authorize(Roles = "Admin")] *@
-@using System.Text
 @using Clinic.Blazor.DTOs
-@using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json
-@rendermode InteractiveServer
-@inject HttpClient Http
-@inject IJSRuntime JSRuntime
 @inject ApiService apiService
-@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
-
-<h3>Employee</h3>
 <h3 class="mb-4">Danh sách nhân viên</h3>
 
-
-@* cái này xài AI TẠO THỬ 1 CÁI TABLE ĐỂ TEST COI CÓ ĐÚNG CÁI HÀM ONINIT KHÔNG *@
 <MudPaper Class="pa-4">
+    @if (EmployeeList != null)
+    {
+        <p>Số nhân viên: @EmployeeList.Count</p>
+        @foreach (var emp in EmployeeList)
+        {
+            <p>@emp.FullName - @emp.Role</p>
+        }
+    }
+
     @if (EmployeeList == null)
     {
         <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
@@ -28,7 +27,21 @@
     }
     else
     {
-        <MudTable Items="EmployeeList" Hover="true" Bordered="true" Striped="true" Dense="true">
+        <MudTable Items="EmployeeList" Hover="true" Bordered="true" Striped="true" Dense="true"
+                  CanCancelEdit="@canCancelEdit"
+                  @bind-SelectedItem="selectedItem1"
+                  RowEditPreview="@(e => BackupItem((EmployeeDto)e))"
+                  RowEditCancel="@(e => ResetItemToOriginalValues((EmployeeDto)e))"
+                  RowEditCommit="@(e => ItemHasBeenCommitted((EmployeeDto)e))"
+                  ApplyButtonPosition="@applyButtonPosition"
+                  EditButtonPosition="@editButtonPosition"
+                  EditTrigger="@editTrigger">
+
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">List Employees</MudText>
+                <MudSpacer />
+            </ToolBarContent>
+
             <HeaderContent>
                 <MudTh>ID</MudTh>
                 <MudTh>Tên đăng nhập</MudTh>
@@ -38,33 +51,70 @@
                 <MudTh>Mật khẩu</MudTh>
                 <MudTh>Chức vụ</MudTh>
             </HeaderContent>
+
             <RowTemplate>
-                <MudTd DataLabel="ID">@context.Id</MudTd>
-                <MudTd DataLabel="Tên đăng nhập">@context.UserName</MudTd>
-                <MudTd DataLabel="Họ tên">@context.FullName</MudTd>
-                <MudTd DataLabel="Sinh nhật">@context.DOB</MudTd>
-                <MudTd DataLabel="Số điện thoại">@context.PhoneNumber</MudTd>
-                <MudTd DataLabel="Mật khẩu">@context.Password</MudTd>
-                <MudTd DataLabel="Chức vụ">@context.Role</MudTd>
+                <MudTd DataLabel="ID">@context?.Id</MudTd>
+                <MudTd DataLabel="Tên đăng nhập">@context?.UserName</MudTd>
+                <MudTd DataLabel="Họ tên">@context?.FullName</MudTd>
+                <MudTd DataLabel="Sinh nhật">@context?.DOB?.ToString()</MudTd>
+                <MudTd DataLabel="Số điện thoại">@context?.PhoneNumber</MudTd>
+                <MudTd DataLabel="Mật khẩu">@context?.Password</MudTd>
+                <MudTd DataLabel="Chức vụ">@context?.Role.ToString()</MudTd>
             </RowTemplate>
+
+            <RowEditingTemplate>
+                <MudTd DataLabel="ID">@context?.Id</MudTd>
+                <MudTd DataLabel="UserName">@context?.UserName</MudTd>
+                <MudTd DataLabel="FullName">
+                    <MudTextField @bind-Value="editingItem.FullName" Required />
+                </MudTd>
+                <MudTd DataLabel="DOB">
+                    <MudDatePicker @bind-Date="editingItem.DOB" Required />
+                </MudTd>
+                <MudTd DataLabel="PhoneNumber">
+                    <MudTextField @bind-Value="editingItem.PhoneNumber" Required />
+                </MudTd>
+                <MudTd DataLabel="Password">
+                    <MudTextField @bind-Value="editingItem.Password" Required />
+                </MudTd>
+                <MudTd DataLabel="Role">
+                    <MudTextField @bind-Value="editingItem.Role" Required />
+                </MudTd>
+            </RowEditingTemplate>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+
+            <EditButtonContent Context="button">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+            </EditButtonContent>
         </MudTable>
     }
 </MudPaper>
 
-@code {
-    private List<EmployeeDto>? EmployeeList; 
+    @code {
+
+    private List<EmployeeDto> EmployeeList;
+
+    private bool dense = false;
+    private bool canCancelEdit = false;
+    private EmployeeDto selectedItem1;
+    private EmployeeDto? editingItem;
+    private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+    private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
+    private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
 
     protected override async Task OnInitializedAsync()
     {
         try
-        {
-
+        {            
             var response = await apiService.GetAsync("/api/employee/list-employees");
-
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
                 EmployeeList = JsonConvert.DeserializeObject<List<EmployeeDto>>(json);
+                //EmployeeList = list ?? new List<EmployeeDto>();
             }
             else
             {
@@ -74,6 +124,52 @@
         catch (Exception)
         {
             EmployeeList = new List<EmployeeDto>();
+        }
+
+        StateHasChanged();
+    }
+
+    // Tạo bản sao để edit, tránh ObjectDisposedException
+    private void BackupItem(EmployeeDto employee)
+    {
+        editingItem = new EmployeeDto
+        {
+            Id = employee.Id,
+            UserName = employee.UserName,
+            FullName = employee.FullName,
+            DOB = employee.DOB,
+            PhoneNumber = employee.PhoneNumber,
+            Password = employee.Password,
+            Role = employee.Role
+        };
+    }
+
+    // Hủy edit → không thay đổi dữ liệu gốc
+    private void ResetItemToOriginalValues(EmployeeDto employee)
+    {
+        if (editingItem != null)
+        {
+            employee.FullName = editingItem.FullName;
+            employee.DOB = editingItem.DOB;
+            employee.PhoneNumber = editingItem.PhoneNumber;
+            employee.Password = editingItem.Password;
+            employee.Role = editingItem.Role;
+        }
+    }
+
+    // Xác nhận edit → cập nhật list
+    private void ItemHasBeenCommitted(EmployeeDto employee)
+    {
+        if (editingItem != null)
+        {
+            employee.FullName = editingItem.FullName;
+            employee.DOB = editingItem.DOB;
+            employee.PhoneNumber = editingItem.PhoneNumber;
+            employee.Password = editingItem.Password;
+            employee.Role = editingItem.Role;
+
+            Snackbar.Add("Cập nhật thành công!", Severity.Success);
+            StateHasChanged();
         }
     }
 }
