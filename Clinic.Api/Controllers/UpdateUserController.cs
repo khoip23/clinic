@@ -7,7 +7,7 @@ namespace Clinic.Api.Controllers
 {
     [ApiController]
     [Route("api/update")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class UpdateUserController : ClinicBaseController
     {
         private readonly IUserService _userService;

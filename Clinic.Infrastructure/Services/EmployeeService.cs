@@ -32,7 +32,7 @@ namespace Clinic.Infrastructure.Services
                     FullName = e.FullName,
                     DOB = e.DOB,
                     PhoneNumber = e.PhoneNumber,
-                    Password = PasswordHelper.HashPassword(e.Password),
+                    // Password = e.Password, // 123123 => asdjioasjd;ọadoiajsiod
                     Role = (RoleType)e.Role
                 })
             .ToListAsync();

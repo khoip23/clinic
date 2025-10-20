@@ -3,8 +3,12 @@
 @using Newtonsoft.Json
 @inject ApiService apiService
 @inject ISnackbar Snackbar
+@rendermode InteractiveServer
 
-
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <MudPaper Class="pa-4">
     @if (EmployeeList != null)
     {
@@ -22,142 +26,169 @@
     }
     else
     {
-        <MudTable Items="EmployeeList" Hover="true" Dense="true"
-                  CanCancelEdit="true"
-                  @bind-SelectedItem="selectedItem1"
-                  CommitEditTooltip="Commit Edit"
-                  OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))"
-                  RowEditPreview="BackupItem"
-                  RowEditCancel="ResetItemToOriginalValues"
-                  RowEditCommit="ItemHasBeenCommitted"
-                  ApplyButtonPosition="@applyButtonPosition"
-                  EditTrigger="TableEditTrigger.RowClick">
+        <MudSimpleTable Style="overflow-x: auto;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Sinh nhật</th>
+                    <th>Số điện thoại</th>
+                    <th>Chức vụ</th>
+                    <th>Mật khẩu</th>
 
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">List Employees</MudText>
-                <MudSpacer />
-            </ToolBarContent>
-
-            <ColGroup>
-                <col style="width:15px;" />
-                <col style="width:50px;" />
-                <col style="width:60px;" />
-                <col style="width:60%;" />
-                <col style="width:60%;" />
-                <col style="width:60%;" />
-                <col style="width:80px;" />
-            </ColGroup>
-
-            <HeaderContent>
-                <MudTh>ID</MudTh>
-                <MudTh>Tên đăng nhập</MudTh>
-                <MudTh>Họ tên</MudTh>
-                <MudTh>Sinh nhật</MudTh>
-                <MudTh>Số điện thoại</MudTh>
-                <MudTh>Chức vụ</MudTh>
-                <MudTh>Mật khẩu</MudTh>
-                
-            </HeaderContent>
-
-            <RowTemplate>
-                <MudTd DataLabel="ID">@context.Id</MudTd>
-                <MudTd DataLabel="Tên đăng nhập">@context.UserName</MudTd>
-                <MudTd DataLabel="Họ tên">@context.FullName</MudTd>
-                <MudTd DataLabel="Sinh nhật">@context.DOB</MudTd>
-                <MudTd DataLabel="Số điện thoại">@context.PhoneNumber</MudTd>
-                <MudTd DataLabel="Chức vụ">@context.Role</MudTd>
-                <MudTd DataLabel="Mật khẩu">@context.Password</MudTd>
-                
-            </RowTemplate>
-
-            <RowEditingTemplate>
-                <MudTd DataLabel="ID">@context.Id</MudTd>
-                <MudTd DataLabel="UserName">@context.UserName</MudTd>
-                <MudTd DataLabel="FullName">
-                    <MudTextField @bind-Value="@context.FullName" Required />
-                </MudTd>
-                <MudTd DataLabel="DOB">
-                    <MudDatePicker @bind-Date="@context.DOB" Required />
-                </MudTd>
-                <MudTd DataLabel="PhoneNumber">
-                    <MudTextField @bind-Value="@context.PhoneNumber" Required />
-                </MudTd>
-                <MudTd DataLabel="Role">@context.Role</MudTd>
-                <MudTd DataLabel="Password">
-                    <MudTextField @bind-Value="@context.Password" Required />
-                </MudTd>
-            </RowEditingTemplate>
-        </MudTable>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @* Add => goi API Post => add newEmployee vao list => Clear input (làm mới newEmployee (new())  *@
+                <tr>
+                    <td></td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.UserName" Required />
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.FullName" Required />
+                    </td>
+                    <td>
+                        <MudDatePicker @bind-Date="newEmployee.DOB" Required />
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.PhoneNumber" Required />
+                    </td>
+                    <td>
+                        <MudSelect T="RoleType" @bind-Value="@newEmployee.Role">
+                            <MudSelectItem Value="RoleType.Doctor">Doctor</MudSelectItem>
+                            <MudSelectItem Value="RoleType.Admin">Admin</MudSelectItem>
+                        </MudSelect>
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="@newEmployee.Password" Required />
+                    </td>
+                    <td>
+                        <MudIconButton OnClick="@(() => OnAdd())" Icon="@Icons.Material.Filled.Add" Color="Color.Success" />
+                    </td>
+                </tr>
+                @foreach (var row in EmployeeList)
+                {
+                    <tr>
+                        @* nếu dictionary chứa Id này và giá trị trong dictionary cho Id này là true 
+                                thì hiển thị chế độ edit
+                            ngược lại thì
+                                hiển thị chế độ xem
+                            *@
+                        @if (rowUpdates.ContainsKey(row.Id) && rowUpdates[row.Id])
+                        {
+                            <td>@row.Id</td>
+                            <td>@row.UserName</td>
+                            <td>
+                                <MudTextField @bind-Value="row.FullName" Required />
+                            </td>
+                            <td>
+                                <MudDatePicker @bind-Date="row.DOB" Required />
+                            </td>
+                            <td>
+                                <MudTextField @bind-Value="row.PhoneNumber" Required />
+                            </td>
+                            <td>@row.Role</td>
+                            <td>
+                                <MudTextField @bind-Value="@row.Password" Required />
+                            </td>
+                            <td>
+                                <MudIconButton OnClick="@(() => OnSave(row))" Icon="@Icons.Material.Filled.Save" Color="Color.Primary" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@row.Id</td>
+                            <td>@row.UserName</td>
+                            <td>@row.FullName</td>
+                            <td>@row.DOB</td>
+                            <td>@row.PhoneNumber</td>
+                            <td>@row.Role</td>
+                            <td>*******</td>
+                            <td>
+                                <MudIconButton OnClick="@(() => OnEdit(row.Id))" Icon="@Icons.Material.Filled.Edit" Color="Color.Info" />
+                            </td>
+                        }
+                       
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
     }
 </MudPaper>
-
-    @code {
-
+    
+@code {
+    private EmployeeDto newEmployee = new();
     private List<EmployeeDto>? EmployeeList;
+    private void OnEdit(int id)
+    {
+        rowUpdates[id] = true;
+    }
 
-    private List<string> editEvents = new();
+    private async Task OnSave(EmployeeDto row)
+    {
+        var json = JsonConvert.SerializeObject(row);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await apiService.PutAsync("/api/update/update/" + row.Id, content);
 
-    private EmployeeDto selectedItem1 = null;
-    private EmployeeDto? elementBeforeEdit;
-    private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+        if (response.IsSuccessStatusCode)
+        {
+            rowUpdates[row.Id] = false;
+            Snackbar.Add("Cập nhật thành công!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Cập nhật thất bại!", Severity.Error);
+        }
+    }
+
+    private async Task OnAdd()
+    {
+        var json = JsonConvert.SerializeObject(newEmployee);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await apiService.PostAsync("/api/register/employee/", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Thêm nhân viên thành công!", Severity.Success);
+            await OnInitializedAsync();
+            newEmployee = new();
+        }
+        else
+        {
+            Snackbar.Add("Thêm thất bại!", Severity.Error);
+        }
+    }
+
+    //mapping - ánh xạ bool true / false
+    // index -> bool
+    // danh sach của (id    -> bool)
+    private Dictionary<int, bool> rowUpdates = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-
             var response = await apiService.GetAsync("/api/employee/list-employees");
 
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
                 EmployeeList = JsonConvert.DeserializeObject<List<EmployeeDto>>(json);
+                rowUpdates.Clear();
             }
             else
             {
                 EmployeeList = new List<EmployeeDto>();
+                rowUpdates.Clear();
             }
         }
         catch (Exception)
         {
             EmployeeList = new List<EmployeeDto>();
+            rowUpdates.Clear();
         }
     }
-
-    private void AddEditionEvent(string message)
-    {
-        editEvents.Add(message);
-        StateHasChanged();
-    }
-
-    private void BackupItem(object employee)
-    {
-        elementBeforeEdit = new()
-        {
-            UserName = ((EmployeeDto)employee).UserName,
-            FullName = ((EmployeeDto)employee).FullName,
-            DOB = ((EmployeeDto)employee).DOB,
-            PhoneNumber = ((EmployeeDto)employee).PhoneNumber,
-            Role = ((EmployeeDto)employee).Role,
-            Password = ((EmployeeDto)employee).Password,
-        };
-        AddEditionEvent($"RowEditPreview event: made a backup of Element {((EmployeeDto)employee).FullName}");
-    }
-
-    private void ItemHasBeenCommitted(object employee)
-    {
-        AddEditionEvent($"RowEditCommit event: Changes to Element {((EmployeeDto)employee).FullName} committed");
-    }
-
-    private void ResetItemToOriginalValues(object employee)
-    {
-        ((EmployeeDto)employee).UserName = elementBeforeEdit.UserName;
-        ((EmployeeDto)employee).FullName = elementBeforeEdit.FullName;
-        ((EmployeeDto)employee).DOB = elementBeforeEdit.DOB;
-        ((EmployeeDto)employee).PhoneNumber = elementBeforeEdit.PhoneNumber;
-        ((EmployeeDto)employee).Role = elementBeforeEdit.Role;
-        ((EmployeeDto)employee).Password = elementBeforeEdit.Password;
-        AddEditionEvent($"RowEditCancel event: Editing of Element {((EmployeeDto)employee).FullName} canceled");
-    }
-
 }
