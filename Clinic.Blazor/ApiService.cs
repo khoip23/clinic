@@ -7,7 +7,7 @@ namespace Clinic.Blazor
     {
         private readonly IJSRuntime jsRuntime;
         private readonly HttpClient httpClient;
-        public ApiService(IJSRuntime jsRuntime, HttpClient httpClient)   
+        public ApiService(IJSRuntime jsRuntime, HttpClient httpClient)
         {
             this.jsRuntime = jsRuntime;
             this.httpClient = httpClient;
@@ -29,5 +29,28 @@ namespace Clinic.Blazor
 
         }
 
+        public async Task<HttpResponseMessage> GetAsync(string url)
+        {
+            var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
+            return await httpClient.GetAsync(url);
+
+        }
+
+        public async Task<HttpResponseMessage> PutAsync(string url, HttpContent? content = null) // default value
+        {
+
+            var token = await jsRuntime.InvokeAsync<string>("getToken", "access_token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
+            return await httpClient.PutAsync(url, content);
+        }   
     }
 }

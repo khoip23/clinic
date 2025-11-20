@@ -7,7 +7,7 @@ namespace Clinic.Api.Controllers
 {
     [ApiController]
     [Route("api/employee")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class EmployeeController : ClinicBaseController
     {
         private readonly IEmployeeListService _employeelistService;
@@ -16,14 +16,14 @@ namespace Clinic.Api.Controllers
             _employeelistService = employeelistService; 
         }
 
-        [HttpGet("List-Employees")]
-        public async Task<IActionResult> EmployeeLists()
+        [HttpGet("list-employees")]
+        public async Task<IActionResult> EmployeeList()
         {
             var result = await _employeelistService.GetEmployeeListAsync();
             return Ok(result);
         }
 
-        [HttpGet("List-Doctors")]
+        [HttpGet("list-doctors")]
         public async Task<IActionResult> GetDoctorsList()
         {
             var result = await _employeelistService.GetDoctorsAsync();
