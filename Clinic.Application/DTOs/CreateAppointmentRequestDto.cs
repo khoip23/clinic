@@ -8,8 +8,8 @@ namespace Clinic.Application.DTOs
 {
     public class CreateAppointmentRequestDto
     {
-        public DateTime Date { get; set; }
-        public TimeSpan Time { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeOnly Time { get; set; }
         public int? DoctorId { get; set; }
     }
 }
