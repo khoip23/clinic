@@ -1,0 +1,122 @@
+﻿@page "/creat-appointment"
+@using Clinic.Blazor.Components.Helpers
+@using Clinic.Blazor.Converters
+@using Clinic.Blazor.DTOs
+@using Microsoft.AspNetCore.Components
+@using System.Globalization;
+@using Newtonsoft.Json
+@using System.Text
+@inject ApiService apiService
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<h3>Create Appointment</h3>
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<div class="container">
+    <div class="row-picker">
+        <MudDatePicker Label="Chọn ngày khám" @bind-Date="Date" />
+
+        <MudTimePicker Label="Chọn giờ khám" AmPm="true" @bind-Time="Time" />
+    </div>
+
+    <MudSelect T="int" Label="Chọn bác sĩ" @bind-Value="SelectedDoctorId" Dense="true">
+        @foreach (var doctor in Doctors)
+        {
+            <MudSelectItem T="int" Value="@doctor.Id">@doctor.FullName</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveAppointment">Đặt hẹn</MudButton>
+</div>
+
+<style>
+    .container {
+        max-width: auto;
+        margin: 40px auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        background: #fff;
+        border: 2px solid #000;
+        border-radius: 20px;
+        box-shadow: 4px 4px 0px #000;
+    }
+
+        .container * {
+            border-radius: 12px;
+        }
+
+    .row-picker {
+        display: flex;
+        gap: 16px;
+    }
+
+        .row-picker > * {
+            flex: 1;
+        }
+</style>
+
+
+@code {
+    private DateTime? Date = DateTime.Today;
+    private TimeSpan? Time = new TimeSpan(00, 45, 00);
+    private int SelectedDoctorId;
+    private List<EmployeeDto> Doctors = new();
+    private CreateAppointmentRequestDto newAppointment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await apiService.GetAsync("api/employee/list-doctors");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                Doctors = JsonConvert.DeserializeObject<List<EmployeeDto>>(json);
+            }
+            else
+            {
+                Doctors = new List<EmployeeDto>();
+            }
+        }
+        catch (Exception)
+        {
+            Doctors = new List<EmployeeDto>();
+        }
+    }
+
+    private async Task SaveAppointment()
+    {
+        if (Date == null || Time == null)
+        {
+            Snackbar.Add("Vui lòng chọn ngày và giờ!", Severity.Warning);
+            return;
+        }
+
+        var dto = new CreateAppointmentRequestDto
+        {
+            Date = DateOnly.FromDateTime(Date.Value),
+            Time = TimeOnly.FromTimeSpan(Time.Value),
+            DoctorId = SelectedDoctorId
+        };
+
+        var json = JsonConvert.SerializeObject(dto, new JsonSerializerSettings
+        {
+            Converters = { new DateOnlyJsonConverter(), new TimeOnlyJsonConverter() }
+        });
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await apiService.PostAsync("/api/appointment", content);
+        if (response.IsSuccessStatusCode)
+            Snackbar.Add("Đặt lịch thành công!", Severity.Success);
+        else
+            Snackbar.Add("Có lỗi xảy ra!", Severity.Error);
+    }
+
+}
