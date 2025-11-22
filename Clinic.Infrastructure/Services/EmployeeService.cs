@@ -1,6 +1,7 @@
 ﻿using Clinic.Application.DTOs;
 using Clinic.Application.Interface;
 using Clinic.Domain;
+using Clinic.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,9 +27,12 @@ namespace Clinic.Infrastructure.Services
                 .Where(e => role.Contains(e.Role))
                 .Select(e => new EmployeeListDto
                 {
+                    Id = e.Id,
+                    UserName = e.UserName,
                     FullName = e.FullName,
-                    PhoneNumber = e.PhoneNumber,
                     DOB = e.DOB,
+                    PhoneNumber = e.PhoneNumber,
+                    // Password = e.Password, // 123123 => asdjioasjd;ọadoiajsiod
                     Role = (RoleType)e.Role
                 })
             .ToListAsync();

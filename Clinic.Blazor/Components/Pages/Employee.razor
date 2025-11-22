@@ -1,0 +1,194 @@
+﻿@page "/employee"
+@using Clinic.Blazor.DTOs
+@using Newtonsoft.Json
+@inject ApiService apiService
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPaper Class="pa-4">
+    @if (EmployeeList != null)
+    {
+        <p>Số nhân viên: @EmployeeList.Count</p>
+    }
+
+    @if (EmployeeList == null)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        <p>Đang tải dữ liệu...</p>
+    }
+    else if (EmployeeList.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">Không có nhân viên nào trong hệ thống.</MudAlert>
+    }
+    else
+    {
+        <MudSimpleTable Style="overflow-x: auto;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Sinh nhật</th>
+                    <th>Số điện thoại</th>
+                    <th>Chức vụ</th>
+                    <th>Mật khẩu</th>
+
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @* Add => goi API Post => add newEmployee vao list => Clear input (làm mới newEmployee (new())  *@
+                <tr>
+                    <td></td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.UserName" Required />
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.FullName" Required />
+                    </td>
+                    <td>
+                        <MudDatePicker @bind-Date="newEmployee.DOB" Required />
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="newEmployee.PhoneNumber" Required />
+                    </td>
+                    <td>
+                        <MudSelect T="RoleType" @bind-Value="@newEmployee.Role">
+                            <MudSelectItem Value="RoleType.Doctor">Doctor</MudSelectItem>
+                            <MudSelectItem Value="RoleType.Admin">Admin</MudSelectItem>
+                        </MudSelect>
+                    </td>
+                    <td>
+                        <MudTextField @bind-Value="@newEmployee.Password" Required />
+                    </td>
+                    <td>
+                        <MudIconButton OnClick="@(() => OnAdd())" Icon="@Icons.Material.Filled.Add" Color="Color.Success" />
+                    </td>
+                </tr>
+                @foreach (var row in EmployeeList)
+                {
+                    <tr>
+                        @* nếu dictionary chứa Id này và giá trị trong dictionary cho Id này là true 
+                                thì hiển thị chế độ edit
+                            ngược lại thì
+                                hiển thị chế độ xem
+                            *@
+                        @if (rowUpdates.ContainsKey(row.Id) && rowUpdates[row.Id])
+                        {
+                            <td>@row.Id</td>
+                            <td>@row.UserName</td>
+                            <td>
+                                <MudTextField @bind-Value="row.FullName" Required />
+                            </td>
+                            <td>
+                                <MudDatePicker @bind-Date="row.DOB" Required />
+                            </td>
+                            <td>
+                                <MudTextField @bind-Value="row.PhoneNumber" Required />
+                            </td>
+                            <td>@row.Role</td>
+                            <td>
+                                <MudTextField @bind-Value="@row.Password" Required />
+                            </td>
+                            <td>
+                                <MudIconButton OnClick="@(() => OnSave(row))" Icon="@Icons.Material.Filled.Save" Color="Color.Primary" />
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@row.Id</td>
+                            <td>@row.UserName</td>
+                            <td>@row.FullName</td>
+                            <td>@row.DOB</td>
+                            <td>@row.PhoneNumber</td>
+                            <td>@row.Role</td>
+                            <td>*******</td>
+                            <td>
+                                <MudIconButton OnClick="@(() => OnEdit(row.Id))" Icon="@Icons.Material.Filled.Edit" Color="Color.Info" />
+                            </td>
+                        }
+                       
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+</MudPaper>
+    
+@code {
+    private EmployeeDto newEmployee = new();
+    private List<EmployeeDto>? EmployeeList;
+    private void OnEdit(int id)
+    {
+        rowUpdates[id] = true;
+    }
+
+    private async Task OnSave(EmployeeDto row)
+    {
+        var json = JsonConvert.SerializeObject(row);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await apiService.PutAsync("/api/update/update/" + row.Id, content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            rowUpdates[row.Id] = false;
+            Snackbar.Add("Cập nhật thành công!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Cập nhật thất bại!", Severity.Error);
+        }
+    }
+
+    private async Task OnAdd()
+    {
+        var json = JsonConvert.SerializeObject(newEmployee);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await apiService.PostAsync("/api/register/employee/", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Thêm nhân viên thành công!", Severity.Success);
+            await OnInitializedAsync();
+            newEmployee = new();
+        }
+        else
+        {
+            Snackbar.Add("Thêm thất bại!", Severity.Error);
+        }
+    }
+
+    //mapping - ánh xạ bool true / false
+    // index -> bool
+    // danh sach của (id    -> bool)
+    private Dictionary<int, bool> rowUpdates = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await apiService.GetAsync("/api/employee/list-employees");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                EmployeeList = JsonConvert.DeserializeObject<List<EmployeeDto>>(json);
+                rowUpdates.Clear();
+            }
+            else
+            {
+                EmployeeList = new List<EmployeeDto>();
+                rowUpdates.Clear();
+            }
+        }
+        catch (Exception)
+        {
+            EmployeeList = new List<EmployeeDto>();
+            rowUpdates.Clear();
+        }
+    }
+}

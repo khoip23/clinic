@@ -38,7 +38,7 @@ namespace Clinic.Api.Controllers
         }
 
         [HttpPost("employee")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> RegisterEmployee([FromBody] RegisterUserDto dto)
         {
             var response = await _registerUserService.CreateUserAsync(dto);

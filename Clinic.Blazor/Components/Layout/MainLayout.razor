@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
+<!-- MudBlazor Providers (phiên bản cũ dùng self-closing) -->
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -14,13 +15,4 @@
             @Body
         </article>
     </main>
-    @* Required *@
-    <MudThemeProvider />
-    <MudPopoverProvider />
-
-    @* Needed for dialogs *@
-    <MudDialogProvider />
-
-    @* Needed for snackbars *@
-    <MudSnackbarProvider />
 </div>
