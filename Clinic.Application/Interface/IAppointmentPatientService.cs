@@ -12,5 +12,6 @@ namespace Clinic.Application.Interface
     public interface IAppointmentPatientService
     {
         Task<List<AppointmentPatientDto>> GetAppointmentsForPatientAsync(int patientId, StatusAppointment? status = StatusAppointment.Active);
+        Task<bool> CancelAppointmentAsync(int appointmentId, int patientId);
     }
 }

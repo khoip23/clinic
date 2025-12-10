@@ -39,5 +39,19 @@ namespace Clinic.Infrastructure.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<bool> CancelAppointmentAsync(int appointmentId, int patientId)
+        {
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.UserId == patientId);
+
+            if (appointment == null)
+                return false;
+
+            appointment.Status = (int)StatusAppointment.Canceled;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

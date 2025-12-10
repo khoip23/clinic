@@ -1,0 +1,121 @@
+﻿@page "/view-appointment"
+@using Clinic.Blazor.DTOs
+@using Newtonsoft.Json
+@inject ApiService apiService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@rendermode InteractiveServer
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<h3>viewAppointment</h3>
+
+<MudPaper Class="pa-4">
+    @if (AppointmentList != null)
+    {
+        <p>Số lịch hẹn: @AppointmentList.Count</p>
+    }
+
+    @if (AppointmentList == null)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        <p>Đang tải dữ liệu...</p>
+    }
+    else if (AppointmentList.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">Không có lịch hẹn nào trong hệ thống.</MudAlert>
+    }
+    else
+    {
+        <MudSimpleTable Style="overflow-x: auto;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ngày đặt hẹn</th>
+                    <th>Giờ đặt hẹn</th>
+                    <th>Trạng thái</th>
+                    <th>ID Bác sĩ</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in AppointmentList)
+                {
+                    <tr>
+                        <td>@row.Id</td>
+                        <td>@row.Date</td>
+                        <td>@row.Time</td>
+                        <td>@row.Status</td>
+                        <td>@row.DoctorId</td>
+                        <td>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           OnClick="() => CancelAppointment(row.Id)"
+                                           aria-label="delete" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+</MudPaper>
+
+@code {
+    private List<AppointmentPatientDto>? AppointmentList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await apiService.GetAsync("/api/getappointment-patient/Get-Appointment-Patient");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                AppointmentList = JsonConvert.DeserializeObject<List<AppointmentPatientDto>>(json);
+            }
+            else
+            {
+                AppointmentList = new List<AppointmentPatientDto>();
+            }
+        }
+        catch (Exception)
+        {
+            AppointmentList = new List<AppointmentPatientDto>();
+        }
+    }
+    
+    private async Task CancelAppointment(int appointmentId)
+    {
+        try
+        {
+            bool confirm = await DialogService.ShowMessageBox(
+                "Xác nhận hủy lịch hẹn",
+                (MarkupString)$"Bạn có chắc muốn hủy lịch hẹn <b>ID {appointmentId}</b> không?",
+                yesText: "có",
+                cancelText: "không"
+            ) == true;
+
+            if (!confirm)
+                return;
+
+            var response = await apiService.PutAsync(
+                $"/api/getappointment-patient/Cancel/{appointmentId}",
+                null
+            );
+
+            var item = AppointmentList.FirstOrDefault(a => a.Id == appointmentId);
+            if (item != null)
+                item.Status = StatusAppointment.Canceled;
+
+            Snackbar.Add("Đã hủy lịch hẹn!", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
+        }
+    }
+}

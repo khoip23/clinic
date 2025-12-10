@@ -31,5 +31,20 @@ namespace Clinic.Api.Controllers
             var appointmentPatient = await _appointmentPatientService.GetAppointmentsForPatientAsync(patientId.Value, status);
             return Ok(appointmentPatient);
         }
+
+        [HttpPut("Cancel/{appointmentId}")]
+        public async Task<IActionResult> CancelAppointment(int appointmentId)
+        {
+            var patientId = GetCurrentUserId();
+            if (patientId == null)
+                return Unauthorized(new { message = "Thông tin người dùng không tồn tại" });
+
+            var result = await _appointmentPatientService.CancelAppointmentAsync(appointmentId, patientId.Value);
+
+            if (!result)
+                return NotFound(new { message = "Không tìm thấy lịch hẹn hoặc bạn không có quyền hủy." });
+
+            return Ok(new { message = "Hủy lịch hẹn thành công." });
+        }
     }
 }
