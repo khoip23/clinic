@@ -3,6 +3,7 @@
 @using Newtonsoft.Json
 @inject ApiService apiService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @rendermode InteractiveServer
 
 <MudThemeProvider />
@@ -36,6 +37,7 @@
                     <th>Giờ đặt hẹn</th>
                     <th>Trạng thái</th>
                     <th>ID Bác sĩ</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -47,6 +49,12 @@
                         <td>@row.Time</td>
                         <td>@row.Status</td>
                         <td>@row.DoctorId</td>
+                        <td>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           OnClick="() => CancelAppointment(row.Id)"
+                                           aria-label="delete" />
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -76,6 +84,38 @@
         catch (Exception)
         {
             AppointmentList = new List<AppointmentPatientDto>();
+        }
+    }
+    
+    private async Task CancelAppointment(int appointmentId)
+    {
+        try
+        {
+            bool confirm = await DialogService.ShowMessageBox(
+                "Xác nhận hủy lịch hẹn",
+                (MarkupString)$"Bạn có chắc muốn hủy lịch hẹn <b>ID {appointmentId}</b> không?",
+                yesText: "có",
+                cancelText: "không"
+            ) == true;
+
+            if (!confirm)
+                return;
+
+            var response = await apiService.PutAsync(
+                $"/api/getappointment-patient/Cancel/{appointmentId}",
+                null
+            );
+
+            var item = AppointmentList.FirstOrDefault(a => a.Id == appointmentId);
+            if (item != null)
+                item.Status = StatusAppointment.Canceled;
+
+            Snackbar.Add("Đã hủy lịch hẹn!", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
         }
     }
 }

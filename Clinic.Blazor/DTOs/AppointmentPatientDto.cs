@@ -11,7 +11,7 @@
         public int Id { get; set; }
         public DateOnly Date { get; set; }
         public TimeOnly Time { get; set; }
-        public int Status { get; set; }
+        public StatusAppointment Status { get; set; }
         public int? DoctorId { get; set; }
     }
 }
